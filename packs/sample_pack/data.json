@@ -1,0 +1,28 @@
+{
+	"originalScene":"game",
+	"combos":[
+	{
+		"scene":"sugarcoat",
+		"combo":[
+		["d","db","b","2","4"],
+		[ 10, 10, 30, 50, 0 ]],
+		"soundName":"sugar.mp3"
+	},
+	{
+		"scene":"pipe",
+		"combo":[
+		["#","df","3"],
+		[ 10, 10 , 10, 10]],
+		"soundName":"pipe.mp3"
+		
+	},
+	{
+		"scene":"sugarcoat 2",
+		"combo":[
+		["b","4"],
+		[ 10, 10 , 10, 10]],
+		"soundName":"dwayne.mp3"
+		
+	}
+	]
+}
