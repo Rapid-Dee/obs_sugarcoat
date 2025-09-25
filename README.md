@@ -13,3 +13,5 @@ with this app you will avalable to not sugarcoat it in real-time!
 ### Python dependences
 - pynput
 - obs-websocket-py
+---
+inspired by: https://www.reddit.com/r/Tekken/s/EVbBAAkPIL
