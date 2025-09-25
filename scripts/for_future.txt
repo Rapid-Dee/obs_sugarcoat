@@ -1,0 +1,1 @@
+g++ a.cpp -L ./libstdc++-6.dll -o sugarcoater.exe
