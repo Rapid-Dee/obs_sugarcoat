@@ -14,5 +14,6 @@ bonus advice. importantly look inside config file.
 ### Python dependences
 - pynput
 - obs-websocket-py
+- inputs
 ---
 inspired by: https://www.reddit.com/r/Tekken/s/EVbBAAkPIL
