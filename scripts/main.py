@@ -1,7 +1,28 @@
 from datetime import datetime
 import vlc,sys,time,json,logging
-from obswebsocket import obsws, requests
 
+def add_pressed():
+    global pressed,punches,buffer
+    # if had two buttons combination
+    if tuple(pressed) in punches.keys():
+        buffer=buffer[:len(buffer)-len(pressed)+1]
+        buffer.append(punches[tuple(pressed)])
+    elif tuple(pressed)[::-1] in punches.keys():
+        buffer=buffer[:len(buffer)-len(pressed)+1]
+        buffer.append(punches[tuple(pressed)[::-1]])
+    # otherwise
+    elif len(pressed)==1:
+        buffer.append(list(pressed)[0])
+def add_movePressed():
+    #if diagonal pressed
+    global movePressed,diagonals,buffer
+    if tuple(movePressed) in diagonals.keys():
+        buffer.append(diagonals[tuple(movePressed)])
+    elif tuple(movePressed)[::-1] in diagonals.keys():
+        buffer.append(diagonals[tuple(movePressed)[::-1]])
+    # otherwise
+    elif len(movePressed)==1:
+        buffer.append(list(movePressed)[0])
 
 # load variables from config
 def get_config(r,config):
@@ -19,19 +40,29 @@ with open("./config.cfg","r") as file:
     exitKey = get_config(a,"EXIT_KEY")
     packName = get_config(a,"PACK_NAME")
     debugMode = get_config(a,"DEBUG_MODE")
-    buttons = {
-        get_config(a,"KEY_UP"):"u",
-        get_config(a,"KEY_DOWN"):"d",
-        get_config(a,"KEY_LEFT"):"b",
-        get_config(a,"KEY_RIGHT"):"f",
-        get_config(a,"KEY_1"):"1",
-        get_config(a,"KEY_2"):"2",
-        get_config(a,"KEY_3"):"3",
-        get_config(a,"KEY_4"):"4"
-        }
+    if inputType=="gamepad":
+        axis = {"ABS_HAT0X":"bf",
+                "ABS_HAT0Y":"ud"}
+        buttons = {"BTN_WEST":"1",
+                   "BTN_NORTH":"2",
+                   "BTN_SOUTH":"3",
+                   "BTN_EAST":"4",}
+    elif inputType=="keyboard":
+        buttons = {
+            get_config(a,"KEY_UP"):"u",
+            get_config(a,"KEY_DOWN"):"d",
+            get_config(a,"KEY_LEFT"):"b",
+            get_config(a,"KEY_RIGHT"):"f",
+            get_config(a,"KEY_1"):"1",
+            get_config(a,"KEY_2"):"2",
+            get_config(a,"KEY_3"):"3",
+            get_config(a,"KEY_4"):"4"
+            }
 
 if inputType == "keyboard":
     from pynput import keyboard
+if inputType == "gamepad":
+    import inputs
 
 # enable websocket logging
 if debugMode in ["true","1","True"]:
@@ -77,8 +108,24 @@ frame=0 #this is not FPS!!! just ticks
 complete = -1
 buffer = []
 movePressed = set()
+moveCopy = set()
 pressed = set()
 ex=False
+
+def test_combo():
+    global buffer,complete,combos
+    for j in range(len(combos)):
+        combo = combos[j]["combo"]
+        if len(buffer) < len(combo):
+            continue
+        cmp = True
+        cnt = 0
+        for i in range(-1,-len(combo)+1,-1):
+            cmp = ((combo[i]==buffer[i]) or (combo[i]=="#")) and cmp
+        if cmp:
+            complete = j
+            return cmp
+    return False
 
 if inputType=="keyboard":
     def on_press(key):
@@ -93,7 +140,6 @@ if inputType=="keyboard":
             btn = key.char   
         except Exception:#AttributeError:
             btn = str(key)
-
         if debugMode in ["True","1","true"]:
             print(btn,str(round(frame,2)))
             print(movePressed,buffer,"\n")
@@ -103,42 +149,10 @@ if inputType=="keyboard":
                 movePressed.add(buttons[btn])
                 if frame<=0.05:
                     buffer = buffer[:-1]
-                # if diagonal pressed
-                if tuple(movePressed) in diagonals.keys():
-                    buffer.append(diagonals[tuple(movePressed)])
-                elif tuple(movePressed)[::-1] in diagonals.keys():
-                    buffer.append(diagonals[tuple(movePressed)[::-1]])
-                # otherwise
-                else:
-                    buffer.append(buttons[btn])
+                add_movePressed()
             if buttons[btn] in "1234":
                 pressed.add(buttons[btn])
-
-                # if had two buttons combination
-                if tuple(pressed) in punches.keys():
-                    buffer=buffer[:len(buffer)-len(pressed)+1]
-                    buffer.append(punches[tuple(pressed)])
-                elif tuple(pressed)[::-1] in punches.keys():
-                    buffer=buffer[:len(buffer)-len(pressed)+1]
-                    buffer.append(punches[tuple(pressed)[::-1]])
-                # otherwise
-                else:
-                    buffer.append(buttons[btn])
-
-    def test_combo():
-        global buffer,complete,combos
-        for j in range(len(combos)):
-            combo = combos[j]["combo"]
-            if len(buffer) < len(combo):
-                continue
-            cmp = True
-            cnt = 0
-            for i in range(-1,-len(combo)+1,-1):
-                cmp = ((combo[i]==buffer[i]) or (combo[i]=="#")) and cmp
-            if cmp:
-                complete = j
-                return cmp
-        return False
+                add_pressed()
 
     def on_release(key):
         global ex,buffer,movePressed
@@ -175,10 +189,69 @@ if inputType=="keyboard":
 
 
 if obsEnabled in ["true","1","True"]:
+    from obswebsocket import obsws, requests
     ws = obsws(host, port, password)
     ws.connect()
         
 while True:
+    if inputType=="gamepad":
+        events = inputs.get_gamepad()
+        for event in events:
+            # using d-pad
+            if ("ABS_" in event.code) or ("BTN_" in event.code):
+                frame=datetime.now().timestamp()-begin
+                begin=datetime.now().timestamp()
+                if frame>=0.5:
+                    buffer = []
+            if "ABS_HAT0" in event.code:
+                if event.state==0:
+                    for i in axis[event.code]:
+                        if i in movePressed:
+                            movePressed.remove(i)
+                else:
+                    if frame<=0.05:
+                        buffer = buffer[:-1]
+                    movePressed.add(axis[event.code][1] if event.state>=0 else axis[event.code][0])
+                if event.code != "SYN_REPORT":
+                    add_movePressed()
+            elif "ABS_" in event.code:
+                if "ABS_X"==event.code:
+                    for i in "fb":
+                        if i in movePressed:
+                            movePressed.remove(i)
+                    if event.state>17000:
+                        movePressed.add("f")
+                    if event.state<-17000:
+                        movePressed.add("b")
+                if "ABS_Y"==event.code:
+                    for i in "ud":
+                        if i in movePressed:
+                            movePressed.remove(i)
+                    if event.state>17000:
+                        movePressed.add("u")
+                    if event.state<-17000:
+                        movePressed.add("d")
+                if moveCopy != movePressed:
+                    add_movePressed()
+                moveCopy = set()
+                for i in movePressed:
+                    moveCopy.add(i)
+            elif "BTN_" in event.code:
+                if event.state==0:
+                    if buttons[event.code] in pressed:
+                            pressed.remove(buttons[event.code])
+                if event.state==1:
+                    pressed.add(buttons[event.code])
+                    add_pressed()
+            if debugMode in ["1","True","true"]:    
+                print(event.ev_type, event.code, event.state)
+                print(movePressed)
+                print(pressed)
+                print(buffer)
+        if test_combo():
+            buffer = []
+        if complete==-1:
+            continue
     if inputType=="keyboard":
         with keyboard.Listener(
                 on_press=on_press,

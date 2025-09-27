@@ -11,9 +11,6 @@ with this app you will avalable to not sugarcoat it in real-time!
 6. run sugarcoater.exe
 bonus advice. importantly look inside config file.
 ---
-### Gamepad not working yet
-do not change INPUT_TYPE! 
----
 ### Python dependences
 - pynput
 - obs-websocket-py
