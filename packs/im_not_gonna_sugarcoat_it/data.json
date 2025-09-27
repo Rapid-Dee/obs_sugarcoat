@@ -1,0 +1,11 @@
+{
+	"originalScene":"Scene",
+	"combos":[
+	{
+		"scene":"Scene 2",
+		"combo":
+		["f","d","df","2"],
+		"soundName":"daaamn.mp3"
+	}
+	]
+}

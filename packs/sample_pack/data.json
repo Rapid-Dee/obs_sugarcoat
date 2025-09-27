@@ -3,24 +3,21 @@
 	"combos":[
 	{
 		"scene":"sugarcoat",
-		"combo":[
+		"combo":
 		["d","db","b","2","4"],
-		[ 10, 10, 30, 50, 0 ]],
 		"soundName":"sugar.mp3"
 	},
 	{
 		"scene":"pipe",
-		"combo":[
-		["#","df","3"],
-		[ 10, 10 , 10, 10]],
+		"combo":
+		["df","#","3"],
 		"soundName":"pipe.mp3"
 		
 	},
 	{
 		"scene":"sugarcoat 2",
-		"combo":[
+		"combo":
 		["b","4"],
-		[ 10, 10 , 10, 10]],
 		"soundName":"dwayne.mp3"
 		
 	}

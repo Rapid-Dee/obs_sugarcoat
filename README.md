@@ -8,7 +8,11 @@ with this app you will avalable to not sugarcoat it in real-time!
 3. open obs and start websocket. you need copy password to config.cfg-file
 4. look at the example pack and make your own
 5. create scenes like in pack
-6. run sgarcoater.exe
+6. run sugarcoater.exe
+bonus advice. importantly look inside config file.
+---
+### Gamepad not working yet
+do not change INPUT_TYPE! 
 ---
 ### Python dependences
 - pynput
