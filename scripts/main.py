@@ -236,7 +236,7 @@ while True:
                 moveCopy = set()
                 for i in movePressed:
                     moveCopy.add(i)
-            elif "BTN_" in event.code:
+            elif event.code in buttons.keys():
                 if event.state==0:
                     if buttons[event.code] in pressed:
                             pressed.remove(buttons[event.code])
