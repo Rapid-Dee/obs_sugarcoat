@@ -4,16 +4,12 @@ with this app you will avalable to not sugarcoat it in real-time!
 ---
 ## How to setup
 1. install zip and unpack on your pc
-2. install python 3 and highter and all dependences (using pip)
-3. open obs and start websocket. you need copy password to config.cfg-file
-4. look at the example pack and make your own
-5. create scenes like in pack
-6. run sugarcoater.exe
-bonus advice. importantly look inside config file.
+2. open "HOW TO INSTALL.pdf"
 ---
 ### Python dependences
 - pynput
 - obs-websocket-py
 - inputs
+- python-vlc
 ---
 inspired by: https://www.reddit.com/r/Tekken/s/EVbBAAkPIL
